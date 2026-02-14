@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vanilla++ | Скоро</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="bg-pattern"></div>
+
+    <div id="main-menu">
+        <!-- Логотип -->
+        <div id="game-logo">
+            <span class="logo-vanilla">Vanilla</span><span class="logo-plus">++</span>
+            <div class="qubeforge-badge">для QubeForge</div>
+        </div>
+
+        <!-- Основная панель -->
+        <div id="info-panel" class="menu-panel">
+            <h1 class="panel-title">Релиз мода для QubeForge</h1>
+            
+            <!-- ИЗМЕНЕНО: теперь просто "СКОРО" -->
+            <div class="release-date">
+                <span class="coming-soon">СКОРО</span>
+            </div>
+            <p class="release-caption">* следите за обновлениями в Telegram</p>
+
+            <!-- Видеоплеер -->
+            <div class="video-container">
+                <h2 class="video-title">Видеообзор мода</h2>
+                <video controls preload="metadata" poster="poster.jpg">
+                    <source src="video.mp4" type="video/mp4">
+                    Ваш браузер не поддерживает видео.
+                </video>
+            </div>
+
+            <!-- Прогресс -->
+            <div class="progress-container">
+                <div class="progress-label">Готовность: 0%</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width:0%"></div>
+                </div>
+            </div>
+
+            <!-- КНОПКА СКАЧИВАНИЯ (теперь неактивная) -->
+            <div class="download-buttons">
+                <!-- Кнопка неактивная (disabled) -->
+                <button class="menu-btn download-btn mod-btn" disabled>
+                    📦 Скачать мод (ZIP) - СКОРО
+                </button>
+                
+                <!-- Ссылка на Telegram (активная) -->
+                <a href="https://t.me/minecraftclonemods" target="_blank" class="telegram-link">
+                    <button class="menu-btn telegram-btn">
+                        📢 Подписаться на Telegram
+                    </button>
+                </a>
+            </div>
+            <p class="small-note">* Дата выхода будет объявлена в Telegram</p>
+        </div>
+
+        <!-- Блоки с чатом и списком изменений -->
+        <div class="extra-panels">
+            <!-- Список изменений -->
+            <div class="changelog-box panel">
+                <h2 class="panel-subtitle">⚙️ Последние изменения</h2>
+                <div id="changelog-content" class="changelog-content">
+                    Загрузка...
+                </div>
+            </div>
+
+            <!-- Чат через Google Диск -->
+            <div class="account-box panel">
+                <h2 class="panel-subtitle">👤 Чат сообщества (Google Диск)</h2>
+                <div id="login-section">
+                    <input type="text" id="username-input" placeholder="Ваш ник" class="pixel-input">
+                    <button id="login-btn" class="small-btn">Войти</button>
+                </div>
+                <div id="user-greeting" style="display:none;">
+                    Привет, <span id="display-username"></span>!
+                </div>
+
+                <div class="message-section">
+                    <textarea id="message-text" placeholder="Написать сообщение..." class="pixel-input" rows="2"></textarea>
+                    <button id="send-msg-btn" class="small-btn">Отправить</button>
+                </div>
+
+                <div class="messages-list" id="messages-list">
+                    Загрузка сообщений...
+                </div>
+            </div>
+        </div>
+
+        <!-- Нижняя панель с ссылкой на Telegram -->
+        <div id="main-menu-buttons">
+            <a href="https://t.me/minecraftclonemods" target="_blank" class="telegram-version-link">
+                <div class="version-note">
+                    📱 Telegram канал
+                </div>
+            </a>
+            <div class="version-note" style="margin-top: 5px;">
+                Vanilla++ v0.0.1
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== НАСТРОЙКА (ВАШ URL ИЗ GOOGLE APPS SCRIPT) =====
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxQAB6yt43V6t5PdwdTX7eVlRMn1uaENFgrH3O2MAqoE6trW30ikBCnlHA0PX-lMhYU4w/exec';
+        
+        // Загрузка изменений из changes.txt
+        fetch('changes.txt')
+            .then(r => r.text())
+            .then(t => document.getElementById('changelog-content').innerHTML = t.replace(/\n/g, '<br>'))
+            .catch(() => document.getElementById('changelog-content').innerHTML = '• Будут Добавлены Больше 50 Блоков \n• Новая руда "паладий и тд"\n•Новые рабочие столы\n• Система фермерства');
+
+        // ===== ЧАТ ЧЕРЕЗ GOOGLE =====
+        (function() {
+            const USERNAME_KEY = 'vanilla_username';
+            
+            const usernameInput = document.getElementById('username-input');
+            const loginBtn = document.getElementById('login-btn');
+            const loginSection = document.getElementById('login-section');
+            const userGreeting = document.getElementById('user-greeting');
+            const displayUsername = document.getElementById('display-username');
+            const messageText = document.getElementById('message-text');
+            const sendBtn = document.getElementById('send-msg-btn');
+            const messagesList = document.getElementById('messages-list');
+
+            let currentUser = localStorage.getItem(USERNAME_KEY) || '';
+
+            function updateUserUI() {
+                if (currentUser) {
+                    loginSection.style.display = 'none';
+                    userGreeting.style.display = 'block';
+                    displayUsername.textContent = currentUser;
+                } else {
+                    loginSection.style.display = 'flex';
+                    userGreeting.style.display = 'none';
+                }
+            }
+
+            function escapeHtml(unsafe) {
+                return unsafe.replace(/[&<>"]/g, m => {
+                    if (m === '&') return '&amp;';
+                    if (m === '<') return '&lt;';
+                    if (m === '>') return '&gt;';
+                    if (m === '"') return '&quot;';
+                    return m;
+                });
+            }
+
+            async function loadMessages() {
+                try {
+                    const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=get`);
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        let html = '';
+                        data.messages.forEach(msg => {
+                            html += `<div class="message-item">
+                                <span class="msg-author">${escapeHtml(msg.author)}:</span>
+                                <span class="msg-text">${escapeHtml(msg.text)}</span>
+                                <span class="msg-time">${msg.time || ''}</span>
+                            </div>`;
+                        });
+                        messagesList.innerHTML = html || '<p class="empty-msg">Пока нет сообщений.</p>';
+                    }
+                } catch (error) {
+                    messagesList.innerHTML = '<p class="empty-msg">Ошибка загрузки</p>';
+                }
+            }
+
+            async function sendMessage(author, text) {
+                if (!author.trim() || !text.trim()) return;
+                
+                try {
+                    await fetch(GOOGLE_SCRIPT_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: `action=send&author=${encodeURIComponent(author)}&text=${encodeURIComponent(text)}`
+                    });
+                    
+                    setTimeout(loadMessages, 1000);
+                    messageText.value = '';
+                } catch (error) {
+                    alert('Ошибка отправки');
+                }
+            }
+
+            loginBtn.addEventListener('click', () => {
+                const name = usernameInput.value.trim();
+                if (name) {
+                    currentUser = name;
+                    localStorage.setItem(USERNAME_KEY, name);
+                    updateUserUI();
+                }
+            });
+
+            sendBtn.addEventListener('click', () => {
+                if (!currentUser) {
+                    alert('Сначала войдите под ником.');
+                    return;
+                }
+                const text = messageText.value.trim();
+                if (text) {
+                    sendMessage(currentUser, text);
+                }
+            });
+
+            updateUserUI();
+            loadMessages();
+            setInterval(loadMessages, 5000);
+        })();
+    </script>
+</body>
+</html>
